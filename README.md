@@ -6,8 +6,9 @@
 
 <div style="display: flex; align-items: center;">
   <a href="https://www.youtube.com/watch?v=WOWzp7vTf3U">
-    <img src="project4/CS50W_P4_thumbnail.png" alt="YouTube Showcase" width="60%">
+    <img src="project4/CS50W_P4_thumbnail.png" alt="YouTube Showcase" width="50%">
   </a>
+``</br>
   <span style="margin-left: 1em;">It's a Django-powered social media hub inspired by Twitter! 🚀 Experience personalized user pages, follow/unfollow dynamics, post liking/disliking, and effortless post editing.</span>
 </div>
 
