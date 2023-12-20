@@ -1,0 +1,86 @@
+{% extends 'network/layout.html' %}
+
+{% block body %}
+    <script type="application/json" id="likedByWhomData">
+        {{ likedByWhom | default:"{}" | safe }}
+    </script>
+    <script>
+        function likeHandler(id) {
+            const likeButton = document.getElementById(id);
+
+            fetch(`/toggle_like/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+            })
+                .then(response => response.json())
+                .then(result => {
+                    const liked = result.liked;
+                    console.log(result);
+
+                    likeButton.classList.toggle('btn-danger', !liked);
+                    likeButton.classList.toggle('btn-info', liked);
+
+                    location.reload();
+                })
+                .catch(error => console.error('Error:', error)); 
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            var likedByWhomData = JSON.parse(document.getElementById('likedByWhomData').textContent);
+            console.log("likedByWhomData:", likedByWhomData);
+            var postElements = document.querySelectorAll(".like-count");
+
+            postElements.forEach(function(postElement) {
+                var postId = postElement.id.split("-")[2];
+                var likeCount = likedByWhomData[postId] ? likedByWhomData[postId].like_count : 0;
+                postElement.textContent = "Likes: " + likeCount;
+            });
+        }); 
+    </script>
+
+    <h2 class="mx-5 my-3"><strong><em>Following Post</em></strong></h2>
+    <h5 class="mx-5 my-1">Post by all the people followed by us</h5>
+
+    <div class="all-posts mx-5">
+        {% for post in posts_of_the_page %}
+            <div class="post" style="border: 2px solid grey; border-radius: 15px; padding: 5px; margin-bottom: 10px; background-color: white;">
+                <div class="row my-2 d-flex align-items-center"  style="margin-left: 10px;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjRzkEEVtiPqqpsIeWxJzt-6pieZh0gl5wWncL3yQA1XDIZKWtEcYwAvp5qwbMnDWOAQI&usqp=CAU" alt="bird Icon" class="icon" style="border-radius: 10px;" width="20" height="20">
+                    <h5 class="username" style="font-size: 18px; margin: 2px;"><a href="{% url 'profile' user_id=post.user.id %}">{{ post.user }}</a></h5>
+                </div>                 
+                <h6 class="content" style="font-size: 17px; font-style: italic;">{{ post.content }}</h6>
+                <h7 class="date" style="color: grey; font-size: 15px;">{{ post.date }}</h7>
+                <div class="col-md-12 text-right" >
+                    <button class="btn btn-outline-{% if post.id in whoYouliked %}danger{% else %}primary{% endif %} fa fa-{% if post.id in whoYouliked %}thumbs-down{% else %}thumbs-up{% endif %} col-2" id="{{ post.id }}" onclick="likeHandler('{{ post.id }}')" style="font-size:27px; padding: 3px 4px; border-radius: 8px; max-width: 130px; max-height: 35px;"><span class="like-count" id="like-count-{{ post.id }}">Likes: </span></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination d-flex justify-content-center">
+            {% if posts_of_the_page.has_previous and posts_of_the_page.has_next %}
+                    <li class="page-item btn btn-primary d-flex row align-items-center" style="border-radius: 50px; padding: 0px 15px;  margin-left: 28%;">
+                        <a class="page-link" href="?page={{ posts_of_the_page.previous_page_number }}" style="background-color: #007bff; color: white; border: 0px; font-size: 26px;">&lt;&lt; Previous</a>
+                        <a class="page-link" href="?page={{ posts_of_the_page.next_page_number }}" style="background-color: #007bff; color: white; border: 0px; font-size: 26px;">Next &gt;&gt;</a>
+                    </li>
+                {% elif posts_of_the_page.has_previous %}
+                    <li class="page-item btn btn-primary" style="border-radius: 50px; padding: 0px 15px;  margin-left: 37%;">
+                        <a class="page-link" href="?page={{ posts_of_the_page.previous_page_number }}" style="background-color: #007bff; color: white; border: 0px; font-size: 26px;">&lt;&lt; Previous</a>
+                    </li>
+                {% elif posts_of_the_page.has_next %}
+                    <li class="page-item btn btn-primary" style="border-radius: 50px; padding: 0px 15px;  margin-left: 38%;">
+                        <a class="page-link" href="?page={{ posts_of_the_page.next_page_number }}" style="background-color: #007bff; color: white; border: 0px; font-size: 26px;">Next &gt;&gt;</a>
+                    </li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    <div class="pagination-info text-right" style="color: black; font-size: 28px; margin-left: 31%;">
+                        Page {{ posts_of_the_page.number }} of {{ posts_of_the_page.paginator.num_pages }}
+                    </div>
+                {% endif %}
+        </ul>
+    </nav>
+    
+{% endblock %}

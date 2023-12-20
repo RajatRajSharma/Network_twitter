@@ -1,0 +1,44 @@
+function likeHandler(id, whoYouLiked) {
+    // Find the index of post.id in whoYouLiked
+    var index = whoYouLiked.indexOf(id);
+
+    if (index >= 0) {
+        // If post.id is in whoYouLiked, it means the user has already liked the post
+        var liked = true;
+    } else {
+        // If post.id is not in whoYouLiked, it means the user hasn't liked the post
+        var liked = false;
+    }
+
+    // Toggle the like status (like to dislike and vice versa)
+    liked = !liked;
+
+    // Update the button appearance based on the like status
+    var likeButton = document.getElementById(id);
+
+    if (liked) {
+        likeButton.classList.remove('btn-info', 'fa-thumbs-up');
+        likeButton.classList.add('btn-danger', 'fa-thumbs-down');
+        // Send a request to the server to add the like
+        fetch(`/add_like/${id}`)
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                // Reload the page after successful like addition
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    } else {
+        likeButton.classList.remove('btn-danger', 'fa-thumbs-down');
+        likeButton.classList.add('btn-info', 'fa-thumbs-up');
+        // Send a request to the server to remove the like
+        fetch(`/remove_like/${id}`)
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+                // Reload the page after successful like removal
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
